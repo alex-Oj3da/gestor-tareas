@@ -1,81 +1,64 @@
+// src/main.js — arranque y orquestación
 import "./style.css";
-
 import { estado } from "./estado.js";
-import {
-  contarPendientes,
-  contarCompletadas,
-} from "./tareas.js";
+import { contarPendientes } from "./tareas.js";
 
-// Seleccionamos el h1
-const titulo = document.querySelector("h1");
+// ==========================================
+// Mini-Reto 1: querySelector, texto y clases
+// ==========================================
+const h1 = document.querySelector("h1");
+h1.textContent = "Gestor de tareas";
+h1.classList.add("titulo");
 
-// Cambiamos el texto
-titulo.textContent = "Gestor de tareas";
-
-// Añadimos la clase
-titulo.classList.add("titulo");
-
-// Seleccionamos el resumen
 const resumen = document.querySelector("#resumen");
+resumen.textContent = `Tienes ${contarPendientes(estado.tareas)} tareas pendientes`;
 
-// Contamos las tareas pendientes
-const pendientes = contarPendientes(estado.tareas);
-
-// Actualizamos el resumen
-resumen.textContent = `Tienes ${pendientes} tareas pendientes`;
-
-
-// Mini-reto 2
+// ==========================================
+// Mini-Reto 2: querySelectorAll
+// ==========================================
 const lista = document.querySelector("#lista");
 
-// Creamos los tres elementos demo
-const demo1 = document.createElement("li");
-demo1.classList.add("demo");
-demo1.textContent = "Primera tarea de prueba";
+for (const texto of ["Primero", "Segundo", "Tercero"]) {
+  const li = document.createElement("li");
+  li.className = "demo";
+  li.textContent = texto;
+  lista.append(li);
+}
 
-const demo2 = document.createElement("li");
-demo2.classList.add("demo");
-demo2.textContent = "Segunda tarea de prueba";
-
-const demo3 = document.createElement("li");
-demo3.classList.add("demo");
-demo3.textContent = "Tercera tarea de prueba";
-
-// Los añadimos a la lista
-lista.append(demo1, demo2, demo3);
-
-// Seleccionamos todos los li.demo
-const elementosDemo = document.querySelectorAll("li.demo");
-
-// Recorremos los elementos
-elementosDemo.forEach((elemento) => {
-  elemento.textContent = "- " + elemento.textContent;
+const demosNodeList = document.querySelectorAll(".demo");
+demosNodeList.forEach((li) => {
+  li.textContent = "- " + li.textContent;
 });
 
+// ==========================================
+// Mini-Reto 2b: getElementById, getElementsByClassName y HTMLCollection
+// ==========================================
 
-// Mini-reto 2b
-/* Seleccionamos #lista con getElementById.
-Respuesta: el argumento NO lleva #. */
-const listaPorId = document.getElementById("lista");
+// 1) ¿Lleva # el argumento de getElementById?
+//    NO. getElementById recibe el id a secas ("lista"), sin "#".
+//    El "#" solo se usa en los selectores CSS de querySelector.
+const listaClasica = document.getElementById("lista");
 
-// Seleccionamos los elementos demo
-const elementosHTML = document.getElementsByClassName("demo");
+// 2) getElementsByClassName: la clase va sin punto
+const demos = listaClasica.getElementsByClassName("demo");
 
-/*
-Intento de recorrer con forEach:
+// 3) Recorrerlas con .forEach rompe. Lo envuelvo en try/catch
+//    solo para que el script siga y poder ver el error:
+try {
+  demos.forEach((li) => console.log(li));
+} catch (error) {
+  console.error(error);
+}
+// Error en consola: TypeError: demos.forEach is not a function
+// (una HTMLCollection no tiene forEach, solo la NodeList lo tiene)
 
-elementosHTML.forEach((elemento) => {
-  console.log(elemento);
+// 4) Recorrido correcto con Array.from: cambio "- " por "✓ "
+Array.from(demos).forEach((li) => {
+  li.textContent = li.textContent.replace("- ", "✓ ");
 });
 
-Error de consola:
-elementosHTML.forEach is not a function
-
-La HTMLCollection no tiene forEach directamente.
-*/
-
-// Recorrido correcto con Array.from()
-Array.from(elementosHTML).forEach((elemento) => {
-  elemento.textContent = elemento.textContent.replace("- ", "✓ ");
-});
-
+// 5) ¿Viva o estática?
+//    - HTMLCollection (getElementsByClassName): VIVA. Si añado o quito
+//      nodos del DOM, se actualiza sola.
+//    - NodeList de querySelectorAll (Mini-Reto 2): ESTÁTICA. Es una foto
+//      fija del momento en que la pedí.
